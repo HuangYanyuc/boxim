@@ -24,6 +24,13 @@
 						<span class="icon iconfont icon-group_fill"></span>
 					</router-link>
 				</el-menu-item>
+				<!-- <el-menu-item title="搜索" @click="showSearch()"> -->
+				<!-- <span class="el-icon-search"></span> -->
+				<el-menu-item title="搜索">
+					<router-link v-bind:to="'/home/search'">
+						<span class="el-icon-search"></span>
+					</router-link>
+				</el-menu-item>
 				<el-menu-item title="设置" @click="showSetting()">
 					<span class="el-icon-setting"></span>
 				</el-menu-item>
@@ -57,7 +64,6 @@ import UserInfo from '../components/common/UserInfo.vue';
 import FullImage from '../components/common/FullImage.vue';
 import ChatPrivateVideo from '../components/chat/ChatPrivateVideo.vue';
 import ChatVideoAcceptor from '../components/chat/ChatVideoAcceptor.vue';
-
 export default {
 	components: {
 		HeadImage,
@@ -65,24 +71,30 @@ export default {
 		UserInfo,
 		FullImage,
 		ChatPrivateVideo,
-		ChatVideoAcceptor
+		ChatVideoAcceptor,
 	},
 	data() {
 		return {
 			showSettingDialog: false,
-			lastPlayAudioTime: new Date() - 1000
+			lastPlayAudioTime: new Date() - 1000,
+			changeVal: 0,
+			notice: null,
+
+			showSearchDialog: false,
 		}
 	},
 	methods: {
 		init() {
 			this.$store.dispatch("load").then(() => {
+
 				// ws初始化
-				this.$wsApi.connect(process.env.VUE_APP_WS_URL, sessionStorage.getItem("accessToken"));
+				this.$wsApi.connect(window.urlConfig.VUE_APP_WS_URL, sessionStorage.getItem("accessToken"));
 				this.$wsApi.onConnect(() => {
 					// 加载离线消息
 					this.pullPrivateOfflineMessage(this.$store.state.chatStore.privateMsgMaxId);
 					this.pullGroupOfflineMessage(this.$store.state.chatStore.groupMsgMaxId);
 				});
+
 				this.$wsApi.onMessage((cmd, msgInfo) => {
 					if (cmd == 2) {
 						// 关闭ws
@@ -98,6 +110,7 @@ export default {
 					} else if (cmd == 3) {
 						// 插入私聊消息
 						this.handlePrivateMessage(msgInfo);
+						// this.Notmessage()
 					} else if (cmd == 4) {
 						// 插入群聊消息
 						this.handleGroupMessage(msgInfo);
@@ -108,7 +121,7 @@ export default {
 					if (e.code != 3000) {
 						// 断线重连
 						this.$message.error("连接断开，正在尝试重新连接...");
-						this.$wsApi.reconnect(process.env.VUE_APP_WS_URL, sessionStorage.getItem("accessToken"));
+						this.$wsApi.reconnect(window.urlConfig.VUE_APP_WS_URL, sessionStorage.getItem("accessToken"));
 					}
 				});
 			}).catch((e) => {
@@ -257,6 +270,12 @@ export default {
 		closeSetting() {
 			this.showSettingDialog = false;
 		},
+		showSearch() {
+			this.showSearchDialog = true;
+		},
+		closeSearch() {
+			this.showSearchDialog = false;
+		},
 		loadFriendInfo(id) {
 			return new Promise((resolve, reject) => {
 				let friend = this.$store.state.friendStore.friends.find((f) => f.id == id);
@@ -288,6 +307,40 @@ export default {
 					})
 				}
 			});
+		},
+		Notmessage() {
+			function sendNotification() {
+				new Notification("通知标题：", {
+					body: '收到消息，请注意查收。',
+					icon: "<%= BASE_URL %>s.ico"
+				})
+			}
+			if (window.Notification.permission == "granted") { // 判断是否有权限
+				sendNotification();
+			} else if (window.Notification.permission != "denied") {
+				window.Notification.requestPermission(function (permission) { // 没有权限发起请求
+					sendNotification();
+				});
+			}
+
+		},
+		sendNotificationFn() {
+			this.changeVal = 1;
+			this.notice = setInterval(() => {
+				if (this.changeVal) {
+					document.title = '有新消息，注意查看';
+					this.changeVal = 0
+				} else {
+					document.title = process.env.VUE_APP_NAME;
+					this.changeVal = 1
+				}
+			}, 1000);
+		},
+		clearSendNotification() {
+			if (!this.changeVal) {
+				document.title = process.env.VUE_APP_NAME;
+			}
+			clearInterval(this.notice)
 		}
 	},
 	computed: {
@@ -308,6 +361,9 @@ export default {
 			handler(newCount, oldCount) {
 				let tip = newCount > 0 ? `${newCount}条未读` : "";
 				this.$elm.setTitleTip(tip);
+				if (!newCount) {
+					this.clearSendNotification()
+				}
 			},
 			immediate: true
 		}
@@ -321,7 +377,7 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .navi-bar {
 	background: #333333;
 	padding: 10px;
@@ -389,5 +445,13 @@ export default {
 	color: #333;
 	text-align: center;
 
+}
+
+::v-deep .el-menu-item {
+	padding: 0;
+
+	>a {
+		display: block;
+	}
 }
 </style>

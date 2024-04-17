@@ -78,10 +78,10 @@
 					}
 				}
 				// 校验大小
-				if (this.maxSize && file.size > this.maxSize) {
-					this.$message.error(`文件大小不能超过 ${this.fileSizeStr}!`);
-					return false;
-				}
+				// if (this.maxSize && file.size > this.maxSize) {
+				// 	this.$message.error(`文件大小不能超过 ${this.fileSizeStr}!`);
+				// 	return false;
+				// }
 
 				this.$emit("before", file);
 				return true;

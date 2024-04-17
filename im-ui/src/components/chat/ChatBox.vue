@@ -13,9 +13,11 @@
 							<div class="im-chat-box">
 								<ul>
 									<li v-for="(msgInfo, idx) in chat.messages" :key="idx">
-										<chat-message-item v-show="idx >= showMinIdx" :mine="msgInfo.sendId == mine.id"
+										<chat-message-item v-if="idx >= showMinIdx" :mine="msgInfo.sendId == mine.id"
 											:headImage="headImage(msgInfo)" :showName="showName(msgInfo)" :msgInfo="msgInfo"
-											:groupMembers="groupMembers" @delete="deleteMessage" @recall="recallMessage">
+											:groupMembers="groupMembers" @delete="deleteMessage" @recall="recallMessage"
+											:ref="'msg' + msgInfo.id + msgInfo.sendId"
+											:id="'msg' + msgInfo.id + msgInfo.sendId">
 										</chat-message-item>
 									</li>
 								</ul>
@@ -70,7 +72,7 @@
 							</div>
 						</el-footer>
 					</el-container>
-					<el-aside class="chat-group-side-box" width="300px" v-show="showSide">
+					<el-aside class="chat-group-side-box" width="300px" v-if="showSide">
 						<chat-group-side :group="group" :groupMembers="groupMembers" @reload="loadGroup(group.id)">
 						</chat-group-side>
 					</el-aside>
@@ -131,10 +133,10 @@ export default {
 		}
 	},
 	methods: {
-		moveChatToTop(){
+		moveChatToTop() {
 			let chatIdx = this.$store.getters.findChatIdx(this.chat);
 			console.log(chatIdx);
-			this.$store.commit("moveTop",chatIdx);
+			this.$store.commit("moveTop", chatIdx);
 		},
 		closeRefBox() {
 			this.$refs.emoBox.close();
@@ -474,7 +476,7 @@ export default {
 				// 关闭录音窗口
 				this.showVoice = false;
 				this.isReceipt = false;
-				
+
 			})
 		},
 		fillTargetId(msgInfo, targetId) {
@@ -701,13 +703,13 @@ export default {
 						this.loadReaded(this.chat.targetId)
 					}
 					// 滚到底部
-					this.scrollToBottom();
+					this.$store.state.chatStore.msgLocalization || this.scrollToBottom();
 					this.showSide = false;
 					// 消息已读
 					this.readedMessage()
 					// 初始状态只显示30条消息
 					let size = this.chat.messages.length;
-					this.showMinIdx = size > 30 ? size - 30 : 0;
+					if (!this.$store.state.chatStore.msgLocalization) { this.showMinIdx = size > 30 ? size - 30 : 0; }
 					// 重置输入框
 					this.resetEditor();
 					// 复位回执消息
@@ -728,6 +730,12 @@ export default {
 	mounted() {
 		let div = document.getElementById("chatScrollBox");
 		div.addEventListener('scroll', this.onScroll)
+		this.$nextTick(() => {
+			if (this.$store.state.chatStore.msgLocalization) {
+				this.$refs[this.$store.state.chatStore.msgLocalization][0].$vnode.elm.scrollIntoView()
+				this.$store.commit('removeMsgLocalization')
+			}
+		})
 	}
 }
 </script>
@@ -904,4 +912,5 @@ export default {
 		border: #dddddd solid 1px;
 		animation: rtl-drawer-in .3s 1ms;
 	}
-}</style>
+}
+</style>

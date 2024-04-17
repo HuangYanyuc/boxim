@@ -39,7 +39,9 @@
 				searchText: "",
 				messageContent: "",
 				group: {},
-				groupMembers: []
+				groupMembers: [],
+				
+				searchSelect:false,
 			}
 		},
 		methods: {

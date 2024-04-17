@@ -1,59 +1,36 @@
 <template>
-	<div class="chat-item" :class="active ? 'active' : ''" @contextmenu.prevent="ifRightMenu&&showRightMenu($event)">
-		<div class="chat-left">
-			<head-image :url="chat.headImage" :name="chat.showName" :size="45"
-				:id="chat.type=='PRIVATE'?chat.targetId:0"></head-image>
-			<div v-show="chat.unreadCount>0" class="unread-text">{{chat.unreadCount}}</div>
+	<div class="message-item">
+		<div class="message-left">
+			<head-image :url="message.headImage" :name="message.showName" :size="45"
+				:id="message.type=='PRIVATE'?message.targetId:0"></head-image>
 		</div>
-		<div class="chat-right">
-			<div class="chat-name">
-				<div class="chat-name-text">{{chat.showName}}</div>
-				<div class="chat-time-text">{{showTime}}</div>
+		<div class="message-right">
+			<div class="message-name">
+				<div class="message-name-text">{{message.showName}}</div>
 			</div>
-			<div class="chat-content">
-				<div class="chat-at-text">{{atText}}</div>
-				<div class="chat-send-name" v-show="chat.sendNickName">{{chat.sendNickName+':&nbsp;'}}</div>
-				<div class="chat-content-text" v-html="$emo.transform(chat.lastContent)"></div>
+			<div class="message-content">
+				<div class="message-send-name" v-show="message.sendNickName">{{message.sendNickName+':&nbsp;'}}</div>
+				<div class="message-content-text" v-html="$emo.transform(message.content)"></div>
 			</div>
 		</div>
-		<right-menu v-show="rightMenu.show" :pos="rightMenu.pos" :items="rightMenu.items" @close="rightMenu.show=false"
-			@select="onSelectMenu"></right-menu>
 	</div>
 
 </template>
 
 <script>
-	import HeadImage from '../common/HeadImage.vue';
-	import RightMenu from '../common/RightMenu.vue';
+import HeadImage from '../common/HeadImage.vue';
 
 	export default {
-		name: "chatItem",
+		name: "messageItem",
 		components: {
 			HeadImage,
-			RightMenu
 		},
 		data() {
 			return {
-				rightMenu: {
-					show: false,
-					pos: {
-						x: 0,
-						y: 0
-					},
-					items: [{
-						key: 'TOP',
-						name: '置顶',
-						icon: 'el-icon-top'
-					}, {
-						key: 'DELETE',
-						name: '删除',
-						icon: 'el-icon-delete'
-					}]
-				}
 			}
 		},
 		props: {
-			chat: {
+			message: {
 				type: Object
 			},
 			active: {
@@ -68,35 +45,17 @@
 			}
 		},
 		methods: {
-			showRightMenu(e) {
-				this.rightMenu.pos = {
-					x: e.x,
-					y: e.y
-				};
-				this.rightMenu.show = "true";
-			},
-			onSelectMenu(item) {
-				this.$emit(item.key.toLowerCase(), this.msgInfo);
-			}
 		},
 		computed: {
 			showTime() {
-				return this.$date.toTimeText(this.chat.lastSendTime, true)
+				return this.$date.toTimeText(this.message.lastSendTime, true)
 			},
-			atText() {
-				if (this.chat.atMe) {
-					return "[有人@我]"
-				} else if (this.chat.atAll) {
-					return "[@全体成员]"
-				}
-				return "";
-			}
 		}
 	}
 </script>
 
 <style lang="scss">
-	.chat-item {
+	.message-item {
 		height: 50px;
 		display: flex;
 		margin-bottom: 1px;
@@ -117,7 +76,7 @@
 			background-color: #e8e8f0;
 		}
 
-		.chat-left {
+		.message-left {
 			position: relative;
 			display: flex;
 			width: 45px;
@@ -139,7 +98,7 @@
 		}
 
 
-		.chat-right {
+		.message-right {
 			flex: 1;
 			display: flex;
 			flex-direction: column;
@@ -147,11 +106,11 @@
 			text-align: left;
 			overflow: hidden;
 
-			.chat-name {
+			.message-name {
 				display: flex;
 				line-height: 25px;
 				height: 25px;
-				.chat-name-text {
+				.message-name-text {
 					flex: 1;
 					font-size: 15px;
 					font-weight: 600;
@@ -160,7 +119,7 @@
 				}
 				
 				
-				.chat-time-text{
+				.message-time-text{
 					font-size: 13px;
 					text-align: right;
 					color: #888888;
@@ -170,21 +129,21 @@
 				}
 			}
 
-			.chat-content {
+			.message-content {
 				display: flex;
 				line-height: 22px;
 				
-				.chat-at-text {
+				.message-at-text {
 					color: #c70b0b;
 					font-size: 12px;
 				}
 				
-				.chat-send-name{
+				.message-send-name{
 					font-size: 13px;
 				}
 					
 
-				.chat-content-text {
+				.message-content-text {
 					flex: 1;
 					white-space: nowrap;
 					overflow: hidden;

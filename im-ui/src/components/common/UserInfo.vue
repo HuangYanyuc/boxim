@@ -10,6 +10,8 @@
 					<el-descriptions :column="1" :title="user.userName" class="user-info-items">
 						<el-descriptions-item label="昵称">{{ user.nickName }}
 						</el-descriptions-item>
+						<el-descriptions-item label="部门">{{ user.deptName }}
+						</el-descriptions-item>
 						<el-descriptions-item label="签名">{{ user.signature }}
 						</el-descriptions-item>
 					</el-descriptions>

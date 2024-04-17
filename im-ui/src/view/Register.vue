@@ -2,7 +2,7 @@
 	<el-container class="register-view">
 		<div>
 			<el-form :model="registerForm" status-icon :rules="rules" ref="registerForm" label-width="80px" class="web-ruleForm">
-				<div class="register-brand">欢迎成为盒子IM的用户</div>
+				<div class="register-brand">欢迎成为龙芯IM的用户</div>
 				<el-form-item label="用户名" prop="userName">
 					<el-input type="userName" v-model="registerForm.userName" autocomplete="off" placeholder="用户名(登录使用)"></el-input>
 				</el-form-item>

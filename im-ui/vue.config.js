@@ -1,9 +1,12 @@
+const path = require('path')
+function resolve(dir){
+  return path.join(__dirname,dir)
+}
 module.exports = {
-
   devServer: {
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8888',
+        target: 'http://im.loongson.cn/api',
         changeOrigin: true,
         ws: false,
         pathRewrite: {
@@ -11,6 +14,15 @@ module.exports = {
         }
       }
     }
+  },
+  configureWebpack:{
+    resolve:{
+      alias:{
+        '@':resolve('src')
+      },
+      alias:{
+        '@_':resolve('public')
+      }
+    }
   }
- 
 }

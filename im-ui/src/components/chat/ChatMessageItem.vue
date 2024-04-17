@@ -1,6 +1,8 @@
 <template>
-	<div class="chat-msg-item">
-		<div class="chat-msg-tip" v-show="msgInfo.type == $enums.MESSAGE_TYPE.RECALL || msgInfo.type == $enums.MESSAGE_TYPE.TIP_TEXT">{{ msgInfo.content }}</div>
+	<div class="chat-msg-item" >
+		<div class="chat-msg-tip"
+			v-show="msgInfo.type == $enums.MESSAGE_TYPE.RECALL || msgInfo.type == $enums.MESSAGE_TYPE.TIP_TEXT">{{
+				msgInfo.content }}</div>
 		<div class="chat-msg-tip" v-show="msgInfo.type == $enums.MESSAGE_TYPE.TIP_TIME">
 			{{ $date.toTimeText(msgInfo.sendTime) }}
 		</div>
@@ -25,7 +27,7 @@
 							<div class="img-load-box" v-loading="loading" element-loading-text="上传中.."
 								element-loading-background="rgba(0, 0, 0, 0.4)">
 								<img class="send-image" :src="JSON.parse(msgInfo.content).thumbUrl"
-									@click="showFullImageBox()" />
+									@click="showFullImageBox()" loading="lazy" />
 							</div>
 							<span title="发送失败" v-show="loadFail" @click="onSendFail"
 								class="send-fail el-icon-warning"></span>
@@ -54,8 +56,8 @@
 						&& msgInfo.status != $enums.MESSAGE_STATUS.READED">未读</span>
 					<div class="chat-receipt" v-show="msgInfo.receipt" @click="onShowReadedBox">
 						<span v-if="msgInfo.receiptOk" class="icon iconfont icon-ok" title="全体已读"></span>
-						<span v-else>{{msgInfo.readedCount}}人已读</span>
-						
+						<span v-else>{{ msgInfo.readedCount }}人已读</span>
+
 					</div>
 				</div>
 			</div>
@@ -151,6 +153,20 @@ export default {
 		onShowReadedBox() {
 			let rect = this.$refs.chatMsgBox.getBoundingClientRect();
 			this.$refs.chatGroupReadedBox.open(rect);
+		},
+		isJsonString(str) {
+			try {
+				const toObj = JSON.parse(str) // json字符串转对象
+				/*
+					判断条件 1. 排除null可能性 
+							 2. 确保数据是对象或数组
+				*/
+				if (toObj && typeof toObj === 'object') {
+					return JSON.parse(str)
+				}
+			} catch {
+				return str
+			}
 		}
 	},
 	computed: {
@@ -161,7 +177,7 @@ export default {
 			return this.msgInfo.loadStatus && this.msgInfo.loadStatus === "fail";
 		},
 		data() {
-			return JSON.parse(this.msgInfo.content)
+			return this.isJsonString(this.msgInfo.content)
 		},
 		fileSize() {
 			let size = this.data.size;
@@ -277,7 +293,7 @@ export default {
 					flex-wrap: nowrap;
 					flex-direction: row;
 					align-items: center;
-				
+
 					.send-image {
 						min-width: 200px;
 						min-height: 150px;
@@ -297,7 +313,8 @@ export default {
 					flex-direction: row;
 					align-items: center;
 					cursor: pointer;
-					padding-bottom: 5px;	
+					padding-bottom: 5px;
+
 					.chat-file-box {
 						display: flex;
 						flex-wrap: nowrap;
@@ -364,11 +381,11 @@ export default {
 					font-weight: 600;
 				}
 
-				.chat-receipt{
+				.chat-receipt {
 					font-size: 13px;
 					color: blue;
 					cursor: pointer;
-					
+
 					.icon-ok {
 						font-size: 20px;
 						color: #329432;

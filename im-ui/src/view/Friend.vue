@@ -39,6 +39,7 @@
 								<el-descriptions-item label="昵称">{{ userInfo.nickName }}
 								</el-descriptions-item>
 								<el-descriptions-item label="性别">{{ userInfo.sex==0?"男":"女" }}</el-descriptions-item>
+								<el-descriptions-item label="部门">{{ userInfo.deptName }}</el-descriptions-item>
 								<el-descriptions-item label="签名">{{ userInfo.signature }}</el-descriptions-item>
 							</el-descriptions>
 							

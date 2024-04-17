@@ -24,6 +24,9 @@
 					<el-radio :label="1">女</el-radio>
 				</el-radio-group>
 			</el-form-item>
+			<el-form-item label="部门">
+				<el-input type="input" v-model="userInfo.deptName"></el-input>
+			</el-form-item>
 			<el-form-item label="个性签名">
 				<el-input type="textarea" v-model="userInfo.signature"></el-input>
 			</el-form-item>
