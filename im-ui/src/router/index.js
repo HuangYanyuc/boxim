@@ -39,7 +39,7 @@ export default new VueRouter({
                         import ("../view/Friend"),
                 },
                 {
-                    name: "Friends",
+                    name: "Group",
                     path: "/home/group",
                     component: () =>
                         import ("../view/Group"),
@@ -49,6 +49,9 @@ export default new VueRouter({
                     path: '/home/search',
                     component: () =>
                         import ("../view/Search"),
+                    meta: {
+                        keepAlive: true
+                    }
                 }
             ]
         },

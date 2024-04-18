@@ -53,7 +53,8 @@ export default {
 		}
 	},
 	mounted() {
-
+		this.searchText = sessionStorage.getItem('lastSearch')
+		this.onSearchResult()
 	},
 	methods: {
 		onBack() {
@@ -69,16 +70,16 @@ export default {
 			let key = "chats-" + userStore.state.userInfo.id;
 
 			this.usreInfo = JSON.parse(localStorage.getItem(key))
-
 			this.chatStore.chats.forEach(i => {
 				if(i.showName.startsWith(this.searchText) ){
 					i.source = 'chat'
 					arr.push(i)
 				}
 			})
-
 			this.searchUserResult = arr
 			this.searchMessageResult = this.fuzzyQuery(this.usreInfo, this.searchText)
+
+			sessionStorage.setItem('lastSearch',this.searchText)
 		},
 		fuzzyQuery(val, key) {
 			let messageArrs = val.chats, resultArr = []
