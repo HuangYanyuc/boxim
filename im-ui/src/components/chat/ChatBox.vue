@@ -16,8 +16,7 @@
 										<chat-message-item v-if="idx >= showMinIdx" :mine="msgInfo.sendId == mine.id"
 											:headImage="headImage(msgInfo)" :showName="showName(msgInfo)" :msgInfo="msgInfo"
 											:groupMembers="groupMembers" @delete="deleteMessage" @recall="recallMessage"
-											:ref="'msg' + msgInfo.id + msgInfo.sendId"
-											:id="'msg' + msgInfo.id + msgInfo.sendId">
+											:ref="'msg' + msgInfo.id + msgInfo.sendId" :id="'msg' + msgInfo.id + msgInfo.sendId">
 										</chat-message-item>
 									</li>
 								</ul>
@@ -25,8 +24,7 @@
 						</el-main>
 						<el-footer height="240px" class="im-chat-footer">
 							<div class="chat-tool-bar">
-								<div title="表情" class="icon iconfont icon-biaoqing" ref="emotion"
-									@click.stop="showEmotionBox()">
+								<div title="表情" class="icon iconfont icon-biaoqing" ref="emotion" @click.stop="showEmotionBox()">
 								</div>
 								<div title="发送图片">
 									<file-upload :action="'/image/upload'" :maxSize="5 * 1024 * 1024"
@@ -46,24 +44,22 @@
 								</div>
 								<div title="发送语音" class="el-icon-microphone" @click="showVoiceBox()">
 								</div>
-								<div title="视频聊天" v-show="chat.type == 'PRIVATE'" class="el-icon-phone-outline"
-									@click="showVideoBox()">
+								<div title="视频聊天" v-show="chat.type == 'PRIVATE'" class="el-icon-phone-outline" @click="showVideoBox()">
 								</div>
 								<div title="聊天记录" class="el-icon-chat-dot-round" @click="showHistoryBox()"></div>
 							</div>
 							<div class="send-content-area">
 								<div contenteditable="true" v-show="!sendImageUrl" ref="editBox" class="send-text-area"
-									:disabled="lockMessage" @paste.prevent="onEditorPaste"
-									@compositionstart="onEditorCompositionStart" @compositionend="onEditorCompositionEnd"
-									@input="onEditorInput" :placeholder="isReceipt ? '【回执消息】' : ''" @blur="onEditBoxBlur()"
-									@keydown.down="onKeyDown" @keydown.up="onKeyUp" @keydown.enter.prevent="onKeyEnter">x
+									:disabled="lockMessage" @paste.prevent="onEditorPaste" @compositionstart="onEditorCompositionStart"
+									@compositionend="onEditorCompositionEnd" @input="onEditorInput" :placeholder="isReceipt ? '【回执消息】' : ''"
+									@blur="onEditBoxBlur()" @keydown.down="onKeyDown" @keydown.up="onKeyUp"
+									@keydown.enter.prevent="onKeyEnter">x
 								</div>
 
 								<div v-show="sendImageUrl" class="send-image-area">
 									<div class="send-image-box">
 										<img class="send-image" :src="sendImageUrl" />
-										<span class="send-image-close el-icon-close" title="删除"
-											@click="removeSendImage()"></span>
+										<span class="send-image-close el-icon-close" title="删除" @click="removeSendImage()"></span>
 									</div>
 								</div>
 								<div class="send-btn-area">
@@ -96,6 +92,7 @@ import Emotion from "../common/Emotion.vue";
 import ChatVoice from "./ChatVoice.vue";
 import ChatHistory from "./ChatHistory.vue";
 import ChatAtBox from "./ChatAtBox.vue"
+import {mapState} from "vuex"
 
 export default {
 	name: "chatPrivate",
@@ -669,6 +666,16 @@ export default {
 				let div = document.getElementById("chatScrollBox");
 				div.scrollTop = div.scrollHeight;
 			});
+		},
+		msgFixed(){
+			let div = document.getElementById("chatScrollBox");
+				div.addEventListener('scroll', this.onScroll)
+				this.$nextTick(() => {
+					if (this.msgLocalization) {
+						this.$refs[this.msgLocalization][0].$vnode.elm.scrollIntoView()
+						this.$store.commit('removeMsgLocalization')
+					}
+				})
 		}
 	},
 	computed: {
@@ -688,6 +695,9 @@ export default {
 		},
 		unreadCount() {
 			return this.chat.unreadCount;
+		},
+		msgLocalization(){
+			return this.$store.state.chatStore.msgLocalization;
 		}
 	},
 	watch: {
@@ -725,17 +735,16 @@ export default {
 					this.scrollToBottom();
 				}
 			}
+		},
+		'msgLocalization': {
+			handler(n,o) {
+				this.msgFixed()
+			},
+			deep: true
 		}
 	},
 	mounted() {
-		let div = document.getElementById("chatScrollBox");
-		div.addEventListener('scroll', this.onScroll)
-		this.$nextTick(() => {
-			if (this.$store.state.chatStore.msgLocalization) {
-				this.$refs[this.$store.state.chatStore.msgLocalization][0].$vnode.elm.scrollIntoView()
-				this.$store.commit('removeMsgLocalization')
-			}
-		})
+		this.msgFixed()
 	}
 }
 </script>

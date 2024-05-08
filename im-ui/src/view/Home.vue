@@ -24,12 +24,12 @@
 						<span class="icon iconfont icon-group_fill"></span>
 					</router-link>
 				</el-menu-item>
-				<!-- <el-menu-item title="搜索" @click="showSearch()"> -->
-				<!-- <span class="el-icon-search"></span> -->
-				<el-menu-item title="搜索">
+				<el-menu-item title="搜索" @click="showSearch()">
+				<span class="el-icon-search"></span>
+				<!-- <el-menu-item title="搜索">
 					<router-link v-bind:to="'/home/search'">
 						<span class="el-icon-search"></span>
-					</router-link>
+					</router-link> -->
 				</el-menu-item>
 				<el-menu-item title="设置" @click="showSetting()">
 					<span class="el-icon-setting"></span>
@@ -42,6 +42,7 @@
 		<el-main class="content-box">
 			<router-view></router-view>
 		</el-main>
+		<Search :visible="showSearchDialog" @close="closeSearch()"></Search>
 		<setting :visible="showSettingDialog" @close="closeSetting()"></setting>
 		<user-info v-show="uiStore.userInfo.show" :pos="uiStore.userInfo.pos" :user="uiStore.userInfo.user"
 			@close="$store.commit('closeUserInfoBox')"></user-info>
@@ -64,6 +65,7 @@ import UserInfo from '../components/common/UserInfo.vue';
 import FullImage from '../components/common/FullImage.vue';
 import ChatPrivateVideo from '../components/chat/ChatPrivateVideo.vue';
 import ChatVideoAcceptor from '../components/chat/ChatVideoAcceptor.vue';
+import Search from './Search.vue'
 export default {
 	components: {
 		HeadImage,
@@ -72,6 +74,7 @@ export default {
 		FullImage,
 		ChatPrivateVideo,
 		ChatVideoAcceptor,
+		Search,
 	},
 	data() {
 		return {
@@ -79,8 +82,6 @@ export default {
 			lastPlayAudioTime: new Date() - 1000,
 			changeVal: 0,
 			notice: null,
-
-			showSearchDialog: false,
 		}
 	},
 	methods: {
@@ -100,7 +101,7 @@ export default {
 						// 关闭ws
 						this.$wsApi.close(3000)
 						// 异地登录，强制下线
-						this.$alert("您已在其他地方登陆，将被强制下线", "强制下线通知", {
+						this.$alert("您已在其他地方登录，将被强制下线", "强制下线通知", {
 							confirmButtonText: '确定',
 							callback: action => {
 								location.href = "/";
@@ -271,10 +272,12 @@ export default {
 			this.showSettingDialog = false;
 		},
 		showSearch() {
-			this.showSearchDialog = true;
+			// this.showSearchDialog = true;
+			this.$store.commit('setSearchDialog',true)
 		},
 		closeSearch() {
-			this.showSearchDialog = false;
+			this.$store.commit('setSearchDialog',false)
+			// this.showSearchDialog = false;
 		},
 		loadFriendInfo(id) {
 			return new Promise((resolve, reject) => {
@@ -354,6 +357,9 @@ export default {
 				unreadCount += chat.unreadCount
 			});
 			return unreadCount;
+		},
+		showSearchDialog(){
+			return this.$store.state.chatStore.showSearchDialog;
 		}
 	},
 	watch: {

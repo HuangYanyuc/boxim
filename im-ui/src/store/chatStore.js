@@ -13,6 +13,8 @@ export default {
         loadingGroupMsg: false,
         chats: [],
         msgLocalization: null,
+        showSearchDialog: false,
+        updateLocalizationState: false,
     },
 
     mutations: {
@@ -289,10 +291,14 @@ export default {
             state.chats = [];
         },
         setMsgLocalization(state, ref) {
+            state.msgLocalization = null
             state.msgLocalization = ref
         },
         removeMsgLocalization(state) {
             state.msgLocalization = null
+        },
+        setSearchDialog(state, val) {
+            state.showSearchDialog = val
         }
     },
     actions: {

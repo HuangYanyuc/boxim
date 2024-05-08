@@ -1,5 +1,5 @@
 <template>
-	<div class="chat-msg-item" >
+	<div class="chat-msg-item">
 		<div class="chat-msg-tip"
 			v-show="msgInfo.type == $enums.MESSAGE_TYPE.RECALL || msgInfo.type == $enums.MESSAGE_TYPE.TIP_TEXT">{{
 				msgInfo.content }}</div>
@@ -19,40 +19,38 @@
 					<span>{{ showName }}</span>
 					<span>{{ $date.toTimeText(msgInfo.sendTime) }}</span>
 				</div>
-				<div class="chat-msg-bottom" @contextmenu.prevent="showRightMenu($event)">
+				<div class="chat-msg-bottom" @contextmenu.prevent="applyRightMenu && showRightMenu($event)">
 					<div ref="chatMsgBox">
 						<span class="chat-msg-text" v-if="msgInfo.type == $enums.MESSAGE_TYPE.TEXT"
 							v-html="$emo.transform(msgInfo.content)"></span>
 						<div class="chat-msg-image" v-if="msgInfo.type == $enums.MESSAGE_TYPE.IMAGE">
 							<div class="img-load-box" v-loading="loading" element-loading-text="上传中.."
 								element-loading-background="rgba(0, 0, 0, 0.4)">
-								<img class="send-image" :src="JSON.parse(msgInfo.content).thumbUrl"
-									@click="showFullImageBox()" loading="lazy" />
+								<img class="send-image" :src="JSON.parse(msgInfo.content).thumbUrl" @click="showFullImageBox()"
+									loading="lazy" />
 							</div>
-							<span title="发送失败" v-show="loadFail" @click="onSendFail"
-								class="send-fail el-icon-warning"></span>
+							<span title="发送失败" v-show="loadFail" @click="onSendFail" class="send-fail el-icon-warning"></span>
 						</div>
 						<div class="chat-msg-file" v-if="msgInfo.type == $enums.MESSAGE_TYPE.FILE">
 							<div class="chat-file-box" v-loading="loading">
 								<div class="chat-file-info">
-									<el-link class="chat-file-name" :underline="true" target="_blank" type="primary"
-										:href="data.url">{{ data.name }}</el-link>
+									<el-link class="chat-file-name" :underline="true" target="_blank" type="primary" :href="data.url">{{
+										data.name }}</el-link>
 									<div class="chat-file-size">{{ fileSize }}</div>
 								</div>
 								<div class="chat-file-icon">
 									<span type="primary" class="el-icon-document"></span>
 								</div>
 							</div>
-							<span title="发送失败" v-show="loadFail" @click="onSendFail"
-								class="send-fail el-icon-warning"></span>
+							<span title="发送失败" v-show="loadFail" @click="onSendFail" class="send-fail el-icon-warning"></span>
 						</div>
 					</div>
 					<div class="chat-msg-voice" v-if="msgInfo.type == $enums.MESSAGE_TYPE.AUDIO" @click="onPlayVoice()">
 						<audio controls :src="JSON.parse(msgInfo.content).url"></audio>
 					</div>
-					<span class="chat-readed" v-show="msgInfo.selfSend && !msgInfo.groupId
+					<span class="chat-readed" v-show="showReadStatus && msgInfo.selfSend && !msgInfo.groupId
 						&& msgInfo.status == $enums.MESSAGE_STATUS.READED">已读</span>
-					<span class="chat-unread" v-show="msgInfo.selfSend && !msgInfo.groupId
+					<span class="chat-unread" v-show="showReadStatus && msgInfo.selfSend && !msgInfo.groupId
 						&& msgInfo.status != $enums.MESSAGE_STATUS.READED">未读</span>
 					<div class="chat-receipt" v-show="msgInfo.receipt" @click="onShowReadedBox">
 						<span v-if="msgInfo.receiptOk" class="icon iconfont icon-ok" title="全体已读"></span>
@@ -105,6 +103,14 @@ export default {
 			type: Array
 		},
 		menu: {
+			type: Boolean,
+			default: true
+		},
+		applyRightMenu: {
+			type: Boolean,
+			default: true
+		},
+		showReadStatus: {
 			type: Boolean,
 			default: true
 		}
