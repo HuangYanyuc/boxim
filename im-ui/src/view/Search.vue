@@ -1,5 +1,5 @@
 <template>
-	<el-dialog class="search" title="搜索聊天记录" :visible.sync="visible" width="800px" :before-close="onClose">
+	<el-dialog class="search" title="搜索聊天记录" :visible.sync="visible" width="1000px" :before-close="onClose">
 		<div class="search-list-header">
 			<!-- <el-button @click="onBack()" class="el-icon-back"></el-button> -->
 			<el-input placeholder="搜索" v-model="searchText" @keyup.enter.native="onSearchResult">
@@ -21,6 +21,7 @@
 				<ul>
 					<li v-for="(msgInfo, idx) in itemList.messages" :key="idx">
 						<p :class="{ 'chat-time': true, 'chat-time-left': true, 'chat-time-right': (msgInfo.sendId == mine.id) }">
+							{{ msgInfo.sendId == mine.id ? '' : msgInfo.sendNickName }}
 							{{ formatChatTime(msgInfo.sendTime) }}
 						</p>
 						<chat-message-item :mine="msgInfo.sendId == mine.id" :headImage="headImage(msgInfo)" :applyRightMenu="false"
@@ -184,7 +185,13 @@ export default {
 				}
 				return "前天 " + dt;
 			} else {
-				return year + '/' + month + "/" + d1.getDate()
+				let dt = "";
+				if (hours >= 12) {
+					dt = "下午 " + hours + ":" + minutes;
+				} else {
+					dt = "上午 " + hours + ":" + minutes;
+				}
+				return year + '/' + month + "/" + d1.getDate() + ' ' + dt
 			}
 		},
 		dateFormat(fmt, date) {
@@ -254,7 +261,7 @@ export default {
 			height: 30px;
 			flex: 100% 0 0;
 			padding: 0 30px;
-			margin-bottom: 5px;
+			margin-bottom: 15px;
 			font-size: 16px;
 
 			&,
@@ -295,6 +302,7 @@ export default {
 						.chat-time-left {
 							text-align: left;
 						}
+
 						.chat-time-right {
 							text-align: right;
 						}

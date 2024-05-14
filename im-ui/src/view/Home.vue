@@ -2,9 +2,8 @@
 	<el-container class="home-page">
 		<el-aside width="80px" class="navi-bar">
 			<div class="user-head-image">
-				<head-image :name="$store.state.userStore.userInfo.nickName"
-					:url="$store.state.userStore.userInfo.headImageThumb" :size="60"
-					@click.native="showSettingDialog = true">
+				<head-image :name="$store.state.userStore.userInfo.nickName" :url="$store.state.userStore.userInfo.headImageThumb"
+					:size="60" @click.native="showSettingDialog = true">
 				</head-image>
 			</div>
 			<el-menu background-color="#333333" text-color="#ddd" style="margin-top: 30px;">
@@ -25,8 +24,8 @@
 					</router-link>
 				</el-menu-item>
 				<el-menu-item title="搜索" @click="showSearch()">
-				<span class="el-icon-search"></span>
-				<!-- <el-menu-item title="搜索">
+					<span class="el-icon-search"></span>
+					<!-- <el-menu-item title="搜索">
 					<router-link v-bind:to="'/home/search'">
 						<span class="el-icon-search"></span>
 					</router-link> -->
@@ -87,7 +86,7 @@ export default {
 	methods: {
 		init() {
 			this.$store.dispatch("load").then(() => {
-
+				this.getGroupMembers()
 				// ws初始化
 				this.$wsApi.connect(window.urlConfig.VUE_APP_WS_URL, sessionStorage.getItem("accessToken"));
 				this.$wsApi.onConnect(() => {
@@ -128,6 +127,27 @@ export default {
 			}).catch((e) => {
 				console.log("初始化失败", e);
 			})
+		},
+		async getGroupMembers() {
+			let groups = JSON.parse(JSON.stringify(this.$store.state.groupStore.groups))
+			if (!groups || !groups.length) { return false }
+			let getGroupMember = async (id) => {
+				return	await	this.$http({
+					url: `/group/members/${id}`,
+					method: "get"
+				}).then((members) => {
+					return members
+				})
+			}
+			for (let i = 0; i < groups.length; i++) {
+				let val = await getGroupMember(groups[i].id)
+				this.$set(groups[i] , 'members', val)
+			}
+			let groupsObj = {}
+			groups.forEach(item=>{
+				this.$set(groupsObj,item.id,item)
+			})
+			this.$store.commit('setGroupMembers', groupsObj)
 		},
 		pullPrivateOfflineMessage(minId) {
 			this.$http({
@@ -273,10 +293,10 @@ export default {
 		},
 		showSearch() {
 			// this.showSearchDialog = true;
-			this.$store.commit('setSearchDialog',true)
+			this.$store.commit('setSearchDialog', true)
 		},
 		closeSearch() {
-			this.$store.commit('setSearchDialog',false)
+			this.$store.commit('setSearchDialog', false)
 			// this.showSearchDialog = false;
 		},
 		loadFriendInfo(id) {
@@ -358,8 +378,11 @@ export default {
 			});
 			return unreadCount;
 		},
-		showSearchDialog(){
+		showSearchDialog() {
 			return this.$store.state.chatStore.showSearchDialog;
+		},
+		groups() {
+			return this.$store.state.groupStore.groups;
 		}
 	},
 	watch: {
@@ -370,6 +393,13 @@ export default {
 				if (!newCount) {
 					this.clearSendNotification()
 				}
+			},
+			immediate: true
+		},
+		groups: {
+			handler() {
+				console.log('watch groups')
+				this.getGroupMembers()
 			},
 			immediate: true
 		}

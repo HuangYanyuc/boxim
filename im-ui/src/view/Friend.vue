@@ -4,7 +4,7 @@
 			<div class="friend-list-header">
 				<div class="friend-list-search">
 					<el-input width="200px" placeholder="搜索好友" v-model="searchText">
-						<el-button slot="append" icon="el-icon-search"></el-button>
+						<!-- <el-button slot="append" icon="el-icon-search"></el-button> -->
 					</el-input>
 				</div>
 				<el-button plain icon="el-icon-plus" style="border: none; padding:12px; font-size: 20px;color: black;"
@@ -14,7 +14,7 @@
 			</div>
 			<el-scrollbar class="friend-list-items">
 				<div v-for="(friend,index) in $store.state.friendStore.friends" :key="index">
-					<friend-item v-show="friend.nickName.startsWith(searchText)"  :index="index"
+					<friend-item v-show="friend.nickName.indexOf(searchText) !== -1"  :index="index"
 						:active="friend === $store.state.friendStore.activeFriend" @chat="onSendMessage(friend)"
 						@delete="onDelItem(friend,index)" @click.native="onActiveItem(friend,index)">
 					</friend-item>

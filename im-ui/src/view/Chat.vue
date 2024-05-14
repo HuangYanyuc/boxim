@@ -13,9 +13,8 @@
 			<el-scrollbar class="chat-list-items">
 				<div class="searchMsgBtn" @click="onSearchMsgBtn" v-show="showSearchBtn">搜索聊天记录</div>
 				<div v-for="(chat, index) in chatStore.chats" :key="index">
-					<chat-item v-show="chat.showName.startsWith(searchText)" :chat="chat" :index="index"
-						@click.native="onActiveItem(index)" @delete="onDelItem(index)" @top="onTop(index)"
-						:active="chat === chatStore.activeChat"></chat-item>
+					<chat-item v-show="chatItemShowFn(chat)" :chat="chat" :index="index" @click.native="onActiveItem(index)"
+						@delete="onDelItem(index)" @top="onTop(index)" :active="chat === chatStore.activeChat"></chat-item>
 				</div>
 			</el-scrollbar>
 		</el-aside>
@@ -40,7 +39,6 @@ export default {
 			searchText: "",
 			messageContent: "",
 			group: {},
-			groupMembers: [],
 
 			searchSelect: false,
 			showSearchBtn: false,
@@ -66,8 +64,23 @@ export default {
 		},
 		onSearchMsgBtn() {
 			this.$store.commit('setSearchDialog', true)
-			sessionStorage.setItem('lastSearch',this.searchText)
+			sessionStorage.setItem('lastSearch', this.searchText)
 		},
+		chatItemShowFn(chat) {
+			let ifShow,
+				groups = this.groupStore.groupMembers
+			if (chat.type === 'GROUP') {
+				groups[chat.targetId]?.members.forEach(item => {
+					if (item.aliasName.indexOf(this.searchText) != '-1') {
+						ifShow = true
+					}
+				})
+				ifShow = ifShow || chat?.showName.indexOf(this.searchText) != '-1'
+			} else {
+				ifShow = chat.showName.indexOf(this.searchText) != '-1'
+			}
+			return ifShow
+		}
 	},
 	computed: {
 		chatStore() {
@@ -75,6 +88,9 @@ export default {
 		},
 		loading() {
 			return this.chatStore.loadingGroupMsg || this.chatStore.loadingPrivateMsg
+		},
+		groupStore() {
+			return this.$store.state.groupStore;
 		},
 	}
 }
