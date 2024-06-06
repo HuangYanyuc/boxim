@@ -3,8 +3,7 @@
 		<div class="agm-container">
 			<div class="agm-l-box">
 				<el-input width="200px" placeholder="搜索好友" class="input-with-select" v-model="searchText"
-					@keyup.enter.native="onSearch()">
-					<el-button slot="append" icon="el-icon-search" @click="onSearch()"></el-button>
+					>
 				</el-input>
 				<el-scrollbar style="height:400px;">
 					<div v-for="(friend,index) in friends" :key="friend.id">

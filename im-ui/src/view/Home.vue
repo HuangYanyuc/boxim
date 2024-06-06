@@ -13,12 +13,12 @@
 						<div v-show="unreadCount > 0" class="unread-text">{{ unreadCount }}</div>
 					</router-link>
 				</el-menu-item>
-				<el-menu-item title="好友">
+				<el-menu-item title="好友管理">
 					<router-link v-bind:to="'/home/friend'">
 						<span class="el-icon-user"></span>
 					</router-link>
 				</el-menu-item>
-				<el-menu-item title="群聊">
+				<el-menu-item title="群管理">
 					<router-link v-bind:to="'/home/group'">
 						<span class="icon iconfont icon-group_fill"></span>
 					</router-link>
@@ -132,7 +132,7 @@ export default {
 			let groups = JSON.parse(JSON.stringify(this.$store.state.groupStore.groups))
 			if (!groups || !groups.length) { return false }
 			let getGroupMember = async (id) => {
-				return	await	this.$http({
+				return await this.$http({
 					url: `/group/members/${id}`,
 					method: "get"
 				}).then((members) => {
@@ -141,11 +141,11 @@ export default {
 			}
 			for (let i = 0; i < groups.length; i++) {
 				let val = await getGroupMember(groups[i].id)
-				this.$set(groups[i] , 'members', val)
+				this.$set(groups[i], 'members', val)
 			}
 			let groupsObj = {}
-			groups.forEach(item=>{
-				this.$set(groupsObj,item.id,item)
+			groups.forEach(item => {
+				this.$set(groupsObj, item.id, item)
 			})
 			this.$store.commit('setGroupMembers', groupsObj)
 		},
@@ -273,7 +273,26 @@ export default {
 		onExit() {
 			this.$wsApi.close(3000);
 			sessionStorage.removeItem("accessToken");
+			this.delCookie('accessToken');
 			location.href = "/";
+		},
+		// 删除cookie
+		delCookie(name) {
+			var exp = new Date();
+			exp.setTime(exp.getTime() - 1);
+			var cval = this.getCookie(name);
+			if (cval != null) {
+				document.cookie = name + "=" + cval + ";expires=" + exp.toGMTString();
+			}
+		},
+		// 获取cookie、
+		getCookie(name) {
+			let reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
+			let arr = document.cookie.match(reg)
+			if (arr) {
+				return unescape(arr[2]);
+			}
+			return '';
 		},
 		playAudioTip() {
 			if (new Date() - this.lastPlayAudioTime > 1000) {
@@ -407,7 +426,7 @@ export default {
 	mounted() {
 		this.init();
 	},
-	unmounted() {
+	beforeDestroy () {
 		this.$wsApi.close();
 	}
 }

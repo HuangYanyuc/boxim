@@ -29,7 +29,7 @@
 							<file-upload v-show="isOwner" class="avatar-uploader" :action="imageAction" :showLoading="true"
 								:maxSize="maxSize" @success="onUploadSuccess"
 								:fileTypes="['image/jpeg', 'image/png', 'image/jpg', 'image/webp']">
-								<img v-if="activeGroup.headImage" :src="activeGroup.headImage" class="avatar">
+								<img crossOrigin="anonymous" v-if="activeGroup.headImage" :src="activeGroup.headImage" class="avatar">
 								<i v-else class="el-icon-plus avatar-uploader-icon"></i>
 							</file-upload>
 							<head-image v-show="!isOwner" class="avatar" :size="200" :url="activeGroup.headImage"
@@ -59,8 +59,11 @@
 								<el-button type="success" @click="onSaveGroup()">提交</el-button>
 								<el-button type="danger" v-show="!isOwner" @click="onQuit()">退出群聊</el-button>
 								<el-button type="danger" v-show="isOwner" @click="onDissolve()">解散群聊</el-button>
+								<el-button type="success" v-show="isOwner" @click="onTransfer()">转移群主</el-button>
 							</div>
 						</el-form>
+						<transfer-group :visible="showTransferGroup" :groupId="activeGroup.id" :members="groupMembers" :ownerId="activeGroup.ownerId"
+							@reload="loadGroupMembers" @close="onCloseTransfer" @onOk="onOKTransferGroup"></transfer-group>
 					</div>
 					<el-divider content-position="center"></el-divider>
 					<el-scrollbar style="height:200px;">
@@ -92,6 +95,7 @@ import FileUpload from '../components/common/FileUpload';
 import GroupMember from '../components/group/GroupMember.vue';
 import AddGroupMember from '../components/group/AddGroupMember.vue';
 import HeadImage from '../components/common/HeadImage.vue';
+import TransferGroup from '../components/group/TransferGroup.vue';
 export default {
 	name: "group",
 	components: {
@@ -99,7 +103,8 @@ export default {
 		GroupMember,
 		FileUpload,
 		AddGroupMember,
-		HeadImage
+		HeadImage,
+		TransferGroup
 	},
 	data() {
 		return {
@@ -108,6 +113,7 @@ export default {
 			activeGroup: {},
 			groupMembers: [],
 			showAddGroupMember: false,
+			showTransferGroup: false,
 			rules: {
 				name: [{
 					required: true,
@@ -188,8 +194,35 @@ export default {
 					this.reset();
 				});
 			})
-
 		},
+		onTransfer() {
+			this.showTransferGroup = true
+		},
+		onCloseTransfer(){
+			this.showTransferGroup = false
+		},
+		onOKTransferGroup(newOwnerId){
+			this.$confirm(`确定将群主转移给成员'${newOwnerId.aliasName}'吗？`, '确认转移?', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'warning'
+			}).then(() => {
+				this.$http({
+					url: `/group/transferGroupOwner`,
+					method: 'post',
+					data: {
+						groupId: this.activeGroup.id,
+						newOwnerId: newOwnerId.userId
+					}
+				}).then(() => {
+					this.$message.success(`已将${newOwnerId.aliasName}设为群主`);
+					this.onCloseTransfer()
+					this.$store.dispatch('loadGroup')
+					this.reset();
+				});
+			})
+		},
+
 		onKick(member) {
 			this.$confirm(`确定将成员'${member.aliasName}'移出群聊吗？`, '确认移出?', {
 				confirmButtonText: '确定',
@@ -252,7 +285,6 @@ export default {
 		groupItemShowFn(group) {
 			let ifShow,
 				groups = this.groupStore.groupMembers
-			console.log(this.groupStore)
 			groups[group.id]?.members.forEach(item => {
 				if (item.aliasName.indexOf(this.searchText) != '-1') {
 					ifShow = true

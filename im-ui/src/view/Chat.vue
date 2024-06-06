@@ -12,10 +12,26 @@
 			</div>
 			<el-scrollbar class="chat-list-items">
 				<div class="searchMsgBtn" @click="onSearchMsgBtn" v-show="showSearchBtn">搜索聊天记录</div>
-				<div v-for="(chat, index) in chatStore.chats" :key="index">
-					<chat-item v-show="chatItemShowFn(chat)" :chat="chat" :index="index" @click.native="onActiveItem(index)"
-						@delete="onDelItem(index)" @top="onTop(index)" :active="chat === chatStore.activeChat"></chat-item>
-				</div>
+				<template v-if="!searchText">
+					<div v-for="(chat, index) in chatStore.chats" :key="index">
+						<chat-item :chat="chat" :index="index" @click.native="onActiveItem(index)" @delete="onDelItem(index)"
+							@top="onTop(index)" :active="chat === chatStore.activeChat"></chat-item>
+					</div>
+				</template>
+				<template v-if="searchText">
+					<div class="searchMsgTitele" v-show="chatsList.users.length>0">好友</div>
+					<div v-for="(chat) in chatsList.users" :key="chat.arrIndex">
+						<chat-item :chat="chat" :index="chat.arrIndex" @click.native="onActiveItem(chat.arrIndex)"
+							@delete="onDelItem(chat.arrIndex)" @top="onTop(chat.arrIndex)"
+							:active="chat === chatStore.activeChat"></chat-item>
+					</div>
+					<div class="searchMsgTitele"  v-show="chatsList.groups.length>0">群聊</div>
+					<div v-for="(chat) in chatsList.groups" :key="chat.arrIndex">
+						<chat-item :chat="chat" :index="chat.arrIndex" @click.native="onActiveItem(chat.arrIndex)"
+							@delete="onDelItem(chat.arrIndex)" @top="onTop(chat.arrIndex)"
+							:active="chat === chatStore.activeChat"></chat-item>
+					</div>
+				</template>
 			</el-scrollbar>
 		</el-aside>
 		<el-container class="chat-box">
@@ -39,6 +55,10 @@ export default {
 			searchText: "",
 			messageContent: "",
 			group: {},
+			chatsList: {
+				users: [],
+				groups: [],
+			},
 
 			searchSelect: false,
 			showSearchBtn: false,
@@ -92,6 +112,34 @@ export default {
 		groupStore() {
 			return this.$store.state.groupStore;
 		},
+	},
+	watch: {
+		searchText() {
+			let arr = {
+				users: [],
+				groups: [],
+			}
+			this.chatStore.chats.forEach((item, index) => {
+				let ifShow,
+					groups = this.groupStore.groupMembers
+				item.arrIndex = index
+				if (item.type === 'GROUP') {
+					groups[item.targetId]?.members.forEach(i => {
+						if (i.aliasName.indexOf(this.searchText) != '-1') {
+							ifShow = true
+						}
+					})
+					if (ifShow || item?.showName.indexOf(this.searchText) != '-1') {
+						arr.groups.push(item)
+					}
+				} else {
+					if (item.showName.indexOf(this.searchText) != '-1') {
+						arr.users.push(item)
+					}
+				}
+			})
+			this.chatsList = arr
+		}
 	}
 }
 </script>
@@ -135,6 +183,13 @@ export default {
 			cursor: pointer;
 			background-color: #f1f1f1;
 		}
+	}
+
+	.searchMsgTitele{
+		height: 30px;
+		line-height: 30px;
+		font-size: 14px;
+		background-color: #d6d6d6;
 	}
 }
 </style>

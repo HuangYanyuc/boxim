@@ -12,7 +12,7 @@
 			return {
 				loading: null,
 				uploadHeaders: {
-					"accessToken": sessionStorage.getItem('accessToken')
+					"accessToken": this.getCookie('accessToken')
 				}
 			}
 		},
@@ -39,6 +39,15 @@
 			}
 		},
 		methods: {
+			// 获取cookie、
+			getCookie(name) {
+				let reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
+				let arr = document.cookie.match(reg)
+				if (arr) {
+					return unescape(arr[2]);
+				}
+				return '';
+			},
 			onFileUpload(file) {
 				// 展示加载条
 				if (this.showLoading) {

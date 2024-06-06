@@ -14,13 +14,21 @@ const http = axios.create({
     }
 })
 
-
+// 获取cookie、
+let getCookie = (name) => {
+    let reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
+    let arr = document.cookie.match(reg)
+    if (arr) {
+        return unescape(arr[2]);
+    }
+    return '';
+}
 
 /**
  * 请求拦截
  */
 http.interceptors.request.use(config => {
-    let accessToken = sessionStorage.getItem("accessToken");
+    let accessToken = sessionStorage.getItem("accessToken") || getCookie('accessToken');
     if (accessToken) {
         config.headers.accessToken = encodeURIComponent(accessToken);
     }
@@ -39,7 +47,7 @@ http.interceptors.response.use(async response => {
         router.replace("/login");
     } else if (response.data.code == 401) {
         console.log("token失效，尝试重新获取")
-        let refreshToken = sessionStorage.getItem("refreshToken");
+        let refreshToken = sessionStorage.getItem("refreshToken") || getCookie('refreshToken');
         if (!refreshToken) {
             router.replace("/login");
         }
@@ -72,6 +80,7 @@ http.interceptors.response.use(async response => {
         return Promise.reject(response.data)
     }
 }, error => {
+    console.log(error, 'error')
     switch (error.response.status) {
         case 400:
             Message({

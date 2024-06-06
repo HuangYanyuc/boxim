@@ -39,13 +39,14 @@
 										<i class="el-icon-wallet"></i>
 									</file-upload>
 								</div>
+								<!-- <div title="截图" class="el-icon-scissors" @click="screenshot"></div> -->
 								<div title="回执消息" v-show="chat.type == 'GROUP'" class="icon iconfont icon-receipt"
 									:class="isReceipt ? 'chat-tool-active' : ''" @click="onSwitchReceipt">
 								</div>
-								<div title="发送语音" class="el-icon-microphone" @click="showVoiceBox()">
-								</div>
-								<div title="视频聊天" v-show="chat.type == 'PRIVATE'" class="el-icon-phone-outline" @click="showVideoBox()">
-								</div>
+								<!-- <div title="发送语音" class="el-icon-microphone" @click="showVoiceBox()">
+								</div> -->
+								<!-- <div title="视频聊天" v-show="chat.type == 'PRIVATE'" class="el-icon-phone-outline" @click="showVideoBox()">
+								</div> -->
 								<div title="聊天记录" class="el-icon-chat-dot-round" @click="showHistoryBox()"></div>
 							</div>
 							<div class="send-content-area">
@@ -58,8 +59,10 @@
 
 								<div v-show="sendImageUrl" class="send-image-area">
 									<div class="send-image-box">
-										<img class="send-image" :src="sendImageUrl" />
-										<span class="send-image-close el-icon-close" title="删除" @click="removeSendImage()"></span>
+										<div class="send-image-div">
+											<img crossOrigin="anonymous" class="send-image" :src="sendImageUrl" />
+											<span class="send-image-close el-icon-close" title="删除" @click="removeSendImage()"></span>
+										</div>
 									</div>
 								</div>
 								<div class="send-btn-area">
@@ -81,6 +84,8 @@
 			<chat-history :visible="showHistory" :chat="chat" :friend="friend" :group="group" :groupMembers="groupMembers"
 				@close="closeHistoryBox"></chat-history>
 		</el-container>
+		<chat-screenshot ref="chatScreenshot" :show="isShowScreentshot" @screenshotClose="closeFn"
+			@screenshot="screenshotCallBack" v-if="isShowScreentshot"></chat-screenshot>
 	</div>
 </template>
 
@@ -92,7 +97,7 @@ import Emotion from "../common/Emotion.vue";
 import ChatVoice from "./ChatVoice.vue";
 import ChatHistory from "./ChatHistory.vue";
 import ChatAtBox from "./ChatAtBox.vue"
-import {mapState} from "vuex"
+import ChatScreenshot from "./ChatScreenshot.vue"
 
 export default {
 	name: "chatPrivate",
@@ -103,7 +108,8 @@ export default {
 		Emotion,
 		ChatVoice,
 		ChatHistory,
-		ChatAtBox
+		ChatAtBox,
+		ChatScreenshot
 	},
 	props: {
 		chat: {
@@ -126,13 +132,13 @@ export default {
 			atSearchText: "",
 			focusNode: null, // 缓存光标所在节点
 			focusOffset: null, // 缓存光标所在节点位置
-			zhLock: false // 解决中文输入法触发英文的情况
+			zhLock: false, // 解决中文输入法触发英文的情况
+			isShowScreentshot: false, //截图
 		}
 	},
 	methods: {
 		moveChatToTop() {
 			let chatIdx = this.$store.getters.findChatIdx(this.chat);
-			console.log(chatIdx);
 			this.$store.commit("moveTop", chatIdx);
 		},
 		closeRefBox() {
@@ -227,6 +233,31 @@ export default {
 		onSwitchReceipt() {
 			this.isReceipt = !this.isReceipt;
 		},
+		screenshot() {
+			this.isShowScreentshot = true
+			this.$nextTick(() => {
+				this.$refs.chatScreenshot.clickBtn()
+			})
+		},
+		screenshotCallBack(data) {
+			this.sendImageFile = new File([data], 'test.jpg', { type: data.type });
+			this.fileOrBlobToDataURL(data, (res) => {
+				this.sendImageUrl = res
+			})
+			this.closeFn()
+		},
+		fileOrBlobToDataURL(obj, cb) {
+			var a = new FileReader();
+			a.readAsDataURL(obj);
+			a.onload = function (e) {
+				cb(e.target.result);
+			};
+		},
+
+		closeFn() {
+			this.isShowScreentshot = false
+		},
+
 		createSendText() {
 			let sendText = this.isReceipt ? "【回执消息】" : "";
 			this.$refs.editBox.childNodes.forEach((node) => {
@@ -457,13 +488,13 @@ export default {
 				method: 'post',
 				data: msgInfo
 			}).then((id) => {
-				msgInfo.id = id;
 				msgInfo.sendTime = new Date().getTime();
 				msgInfo.sendId = this.$store.state.userStore.userInfo.id;
 				msgInfo.selfSend = true;
 				msgInfo.status = this.$enums.MESSAGE_STATUS.UNSEND;
 				msgInfo.readedCount = 0;
-				this.$store.commit("insertMessage", msgInfo);
+				this.$set(msgInfo, 'id', id)
+					this.$store.commit("insertMessage", msgInfo);
 				// 会话置顶
 				this.moveChatToTop();
 				// 保持输入框焦点
@@ -667,15 +698,15 @@ export default {
 				div.scrollTop = div.scrollHeight;
 			});
 		},
-		msgFixed(){
+		msgFixed() {
 			let div = document.getElementById("chatScrollBox");
-				div.addEventListener('scroll', this.onScroll)
-				this.$nextTick(() => {
-					if (this.msgLocalization) {
-						this.$refs[this.msgLocalization][0].$vnode.elm.scrollIntoView()
-						this.$store.commit('removeMsgLocalization')
-					}
-				})
+			div.addEventListener('scroll', this.onScroll)
+			this.$nextTick(() => {
+				if (this.msgLocalization) {
+					this.$refs[this.msgLocalization][0].$vnode.elm.scrollIntoView()
+					this.$store.commit('removeMsgLocalization')
+				}
+			})
 		}
 	},
 	computed: {
@@ -696,8 +727,12 @@ export default {
 		unreadCount() {
 			return this.chat.unreadCount;
 		},
-		msgLocalization(){
+		msgLocalization() {
 			return this.$store.state.chatStore.msgLocalization;
+		},
+
+		chatStore() {
+			return this.$store.state.chatStore;
 		}
 	},
 	watch: {
@@ -737,7 +772,7 @@ export default {
 			}
 		},
 		'msgLocalization': {
-			handler(n,o) {
+			handler(n, o) {
 				this.msgFixed()
 			},
 			deep: true
@@ -880,8 +915,12 @@ export default {
 				border: #53a0e7 solid 1px;
 
 				.send-image-box {
-					position: relative;
 					display: inline-block;
+
+					.send-image-div {
+						display: flex;
+						position: relative;
+					}
 
 					.send-image {
 						max-height: 180px;

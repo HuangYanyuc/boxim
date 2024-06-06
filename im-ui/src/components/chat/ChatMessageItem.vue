@@ -13,10 +13,10 @@
 			</div>
 			<div class="chat-msg-content">
 				<div v-show="mode == 1 && msgInfo.groupId && !msgInfo.selfSend" class="chat-msg-top">
-					<span>{{ showName }}</span>
+					<span style="color: #999;">{{ showName }}</span>
 				</div>
 				<div v-show="mode == 2" class="chat-msg-top">
-					<span>{{ showName }}</span>
+					<span style="color: #999;">{{ showName }}</span>
 					<span>{{ $date.toTimeText(msgInfo.sendTime) }}</span>
 				</div>
 				<div class="chat-msg-bottom" @contextmenu.prevent="applyRightMenu && showRightMenu($event)">
@@ -26,7 +26,7 @@
 						<div class="chat-msg-image" v-if="msgInfo.type == $enums.MESSAGE_TYPE.IMAGE">
 							<div class="img-load-box" v-loading="loading" element-loading-text="上传中.."
 								element-loading-background="rgba(0, 0, 0, 0.4)">
-								<img class="send-image" :src="JSON.parse(msgInfo.content).thumbUrl" @click="showFullImageBox()"
+								<img crossOrigin="anonymous" class="send-image" :src="JSON.parse(msgInfo.content).thumbUrl" @click="showFullImageBox()"
 									loading="lazy" />
 							</div>
 							<span title="发送失败" v-show="loadFail" @click="onSendFail" class="send-fail el-icon-warning"></span>

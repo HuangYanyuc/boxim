@@ -18,7 +18,7 @@ export default {
  @import './assets/style/global.css';
  
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'WenQuanYi Micro Hei','宋体',  Arial;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #2c3e50;

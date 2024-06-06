@@ -63,7 +63,6 @@ export default {
             state.activeChat = state.chats[idx];
         },
         checkChat(state, id) {
-            // console.log(state.chats, id, id.source == 'chat' ? id.targetId : id.belonging.targetId)
             if (id.source === 'chat') {
                 let v = {}
                 state.chats.forEach(i => {
@@ -201,11 +200,13 @@ export default {
             }
             // 根据id顺序插入，防止消息乱序
             let insertPos = chat.messages.length;
-            for (let idx in chat.messages) {
-                if (chat.messages[idx].id && msgInfo.id < chat.messages[idx].id) {
-                    insertPos = idx;
-                    console.log(`消息出现乱序,位置:${chat.messages.length},修正至:${insertPos}`);
-                    break;
+            if (msgInfo.id && msgInfo.id > 0) {
+                for (let idx in chat.messages) {
+                    if (chat.messages[idx].id && (msgInfo.id < chat.messages[idx].id)) {
+                        insertPos = idx;
+                        console.log(`消息出现乱序,位置:${chat.messages.length},修正至:${insertPos}`);
+                        break;
+                    }
                 }
             }
             chat.messages.splice(insertPos, 0, msgInfo);

@@ -8,7 +8,7 @@
 				:maxSize="maxSize"  
 				@success="onUploadSuccess"
 				:fileTypes="['image/jpeg', 'image/png', 'image/jpg','image/webp']">
-					<img v-if="userInfo.headImage" :src="userInfo.headImage" class="avatar">
+					<img crossOrigin="anonymous" v-if="userInfo.headImage" :src="userInfo.headImage" class="avatar">
 					<i v-else class="el-icon-plus avatar-uploader-icon"></i>
 				</file-upload>
 			</el-form-item>

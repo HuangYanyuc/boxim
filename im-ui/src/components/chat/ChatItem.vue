@@ -81,7 +81,7 @@
 		},
 		computed: {
 			showTime() {
-				return this.$date.toTimeText(this.chat.lastSendTime, true)
+				return this.$date.toTimeText(this.chat.lastSendTime, false)
 			},
 			atText() {
 				if (this.chat.atMe) {

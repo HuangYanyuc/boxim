@@ -2,7 +2,7 @@
 	<div class="full-image" v-show="visible" :before-close="onClose" :modal="true">
 		<div class="mask"></div>
 		<div class="image-box">
-			<img  :src="url"/>
+			<img crossOrigin="anonymous"  :src="url"/>
 		</div>
 		<div class="close" @click="onClose">x</div>
 	</div>

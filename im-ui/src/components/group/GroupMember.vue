@@ -3,10 +3,9 @@
 		<head-image :id="member.userId" :name="member.aliasName" 
 			:url="member.headImage" :size="50" 
 			:online="member.online" >
-			<div  v-if="showDel" @click.stop="onDelete()" class="btn-kick el-icon-error"></div>
+			<div v-if="showDel" @click.stop="onDelete()" class="btn-kick el-icon-error"></div>
 		</head-image>
 		<div class="member-name">{{member.aliasName}}</div>
-
 	</div>
 </template>
 

@@ -9,6 +9,14 @@
 		<div class="search-list-box">
 			<div class="search-list">
 				<el-scrollbar class="search-list-items">
+					<!-- <div v-for="(chat, index) in transferArr.messageArrs.users" :key="index">
+						<chat-item :chat="chat" v-if="chat.messages.length > 0" :index="index" @click.native="onActiveItem(chat)"
+							:ifRightMenu="false"></chat-item>
+					</div>
+					<div v-for="(chat, index) in transferArr.messageArrs.groups" :key="index">
+						<chat-item :chat="chat" v-if="chat.messages.length > 0" :index="index" @click.native="onActiveItem(chat)"
+							:ifRightMenu="false"></chat-item>
+					</div> -->
 					<div v-for="(chat, index) in transferArr.messageArrs" :key="index">
 						<chat-item :chat="chat" v-if="chat.messages.length > 0" :index="index" @click.native="onActiveItem(chat)"
 							:ifRightMenu="false"></chat-item>
@@ -61,12 +69,15 @@ export default {
 			group: {},
 			groupMembers: [],
 
-			searchUserResult: [],
+			searchUserResult: {},
 			searchMessageResult: [],
 
 			searchSelect: false,
 			itemList: {},
-			transferArr: {},
+			transferArr: {
+				resultArr: [],
+				messageArrs: []
+			},
 		}
 	},
 	mounted() {
@@ -95,17 +106,21 @@ export default {
 			this.onClose()
 		},
 		onSearchResult() {
-			let arr = [];
+			let arr = {};
 			let key = "chats-" + userStore.state.userInfo.id;
 
 			this.usreInfo = JSON.parse(localStorage.getItem(key))
 			this.chatStore.chats.forEach(i => {
 				if (i.showName.startsWith(this.searchText)) {
 					i.source = 'chat'
-					arr.push(i)
+					// if (i.type == 'GROUP') {
+					// 	arr.groups.push(i)
+					// } else {
+					// 	arr.users.push(i)
+					// }
 				}
 			})
-			this.searchUserResult = arr
+			// this.searchUserResult = arr
 			this.transferArr = this.fuzzyQuery(this.usreInfo, this.searchText)
 			this.searchMessageResult = this.transferArr?.resultArr || ''
 			sessionStorage.setItem('lastSearch', this.searchText)
@@ -119,6 +134,20 @@ export default {
 				arr = i.messages = i.messages.filter(item => item.content && (regex.test(item.content) || regex.test(item.sendNickName)) && item.type !== 21)
 				resultArr.push(...arr)
 			})
+
+			// let arr = {
+			// 	groups: [],
+			// 	users: []
+			// }
+			// messageArrs.forEach(i => {
+			// 	i.source = 'chat'
+			// 	if (i.type == 'GROUP') {
+			// 		arr.groups.push(i)
+			// 	} else {
+			// 		arr.users.push(i)
+			// 	}
+			// })
+			// messageArrs = arr
 
 			return { resultArr, messageArrs }
 		},
@@ -282,6 +311,17 @@ export default {
 			.search-list {
 				height: calc(100% - 40px);
 				overflow-y: auto;
+
+				.search-list-items {
+					height: calc(100% - 40px);
+					border-top: 1px solid #d6d6d6;
+
+					.chat-item {
+						border-bottom: 1px solid #d6d6d6;
+					}
+
+				}
+
 			}
 		}
 
@@ -289,6 +329,9 @@ export default {
 			flex: 50% 1 1;
 			height: calc(100% - 40px);
 			overflow-y: auto;
+			border: 1px solid #d6d6d6;
+			border-bottom: none;
+			border-right: none;
 
 			.search-msg-item {
 				>ul {
@@ -296,8 +339,6 @@ export default {
 
 					li {
 						list-style-type: none;
-
-						.chat-time {}
 
 						.chat-time-left {
 							text-align: left;

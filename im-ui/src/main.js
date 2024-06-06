@@ -9,11 +9,13 @@ import * as socketApi from './api/wssocket';
 import emotion from './api/emotion.js';
 import element from './api/element.js';
 import store from './store';
-import * as  enums from './api/enums.js';
-import * as  date from './api/date.js';
+import * as enums from './api/enums.js';
+import * as date from './api/date.js';
 import './utils/directive/dialogDrag';
+import VueCropper from "vue-cropper";
 
 Vue.use(ElementUI);
+Vue.use(VueCropper);
 // 挂载全局
 Vue.prototype.$wsApi = socketApi;
 Vue.prototype.$date = date;
@@ -24,9 +26,9 @@ Vue.prototype.$enums = enums; // 枚举
 Vue.config.productionTip = false;
 
 new Vue({
-  el: '#app',
-  // 配置路由
-  router,
-  store,
-  render: h=>h(App)
+    el: '#app',
+    // 配置路由
+    router,
+    store,
+    render: h => h(App)
 })

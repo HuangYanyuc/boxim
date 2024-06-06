@@ -1,6 +1,6 @@
 <template>
 	<div class="icp">
-<!--		<img class="icp-icon" src="../../assets/image/icp_logo.png">
+<!--		<img crossOrigin="anonymous" class="icp-icon" src="../../assets/image/icp_logo.png">
 		<a target="_blank"  href="https://beian.miit.gov.cn/">#</a>-->
 	</div>
 </template>

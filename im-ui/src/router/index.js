@@ -10,7 +10,7 @@ Vue.use(VueRouter);
 export default new VueRouter({
     routes: [{
             path: "/",
-            redirect: "/login"
+            redirect: "/home/chat"
         },
         {
             name: "Login",
